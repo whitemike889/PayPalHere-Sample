@@ -23,6 +23,7 @@
 
 - (IBAction)addItem:(id)sender;
 - (IBAction)launchPayPalHere:(id)sender;
+- (NSString *)urlEncode:(NSString *)rawStr;
 
 -(void)animateTextField:(UITextField*)textField up:(BOOL)up;
 @end

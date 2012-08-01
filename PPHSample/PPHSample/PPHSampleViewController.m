@@ -157,32 +157,15 @@
         NSData *jsonData = [NSJSONSerialization dataWithJSONObject:self.invoice.toDictionary options:0 error:&e];
         NSString *jsonDataStr = [[NSString alloc]initWithData:jsonData encoding:NSUTF8StringEncoding];
         NSLog(@"Invoice Object: %@",jsonDataStr);
-        NSString *urlEncodedInvoiceObj = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-                                                                                                              NULL,
-                                                                                                              (__bridge CFStringRef)jsonDataStr,
-                                                                                                              NULL,
-                                                                                                              (CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                                                                                              kCFStringEncodingUTF8));
-
+        NSString *urlEncodedInvoiceObj = [self urlEncode:jsonDataStr];
         
         NSLog(@"URL Encoded Invoice: %@", urlEncodedInvoiceObj);
         // create your return url - this is how the PayPal Here app relaunches your app with payment status
         NSString *returnUrl = @"pphsample://handleReponse?{result}Type={Type}&InvoiceId={InvoiceId}&Tip={Tip}&Email={Email}&TxId={TxId}";
-        NSString *urlEncodedReturnUrl = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-                                                                                      NULL,
-                                                                                      (__bridge CFStringRef)returnUrl,
-                                                                                      NULL,
-                                                                                      (CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                                                                      kCFStringEncodingUTF8));
-        
+        NSString *urlEncodedReturnUrl = [self urlEncode:returnUrl];        
         // create accepted payment types
         NSString *acceptedPaymentTypes = @"cash,card,paypal";
-        NSString *encodedAcceptedPaymentTypes = (NSString *)CFBridgingRelease(CFURLCreateStringByAddingPercentEscapes(
-                                                                                                              NULL,
-                                                                                                              (__bridge CFStringRef)acceptedPaymentTypes,
-                                                                                                              NULL,
-                                                                                                              (CFStringRef)@"!*'();:@&=+$,/?%#[]",
-                                                                                                              kCFStringEncodingUTF8));
+        NSString *encodedAcceptedPaymentTypes = [self urlEncode:acceptedPaymentTypes]; 
 
         // assemble the required parameters to launch the PayPal Here app 
         NSString *pphUrlString = [NSString stringWithFormat: @"paypalhere://takePayment?accepted=%@&returnUrl=%@&invoice=%@&step=choosePayment", encodedAcceptedPaymentTypes, urlEncodedReturnUrl, urlEncodedInvoiceObj];
@@ -200,6 +183,17 @@
         
         [sheet showFromRect:self.view.bounds inView:self.view animated:YES];
     }
+}
+
+- (NSString *)urlEncode:(NSString *)rawStr {
+    NSString *encodedStr = (NSString *)CFBridgingRelease(
+                                                         CFURLCreateStringByAddingPercentEscapes(
+                                                                                                 NULL,
+                                                                                                 (__bridge CFStringRef)rawStr,
+                                                                                                 NULL,
+                                                                                                 (CFStringRef)@"!*'();:@&=+$,/?%#[]",
+                                                                                                 kCFStringEncodingUTF8));
+    return encodedStr;
 }
 
 - (void)actionSheet:(UIActionSheet *)actionSheet 
